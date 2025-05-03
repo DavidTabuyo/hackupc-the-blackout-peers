@@ -104,6 +104,8 @@ static enum MHD_Result answer_to_connection(void *cls,
     if (!(strcmp(method, "GET") == 0 || strcmp(method, "HEAD") == 0))
         return MHD_NO;
 
+    load_flights();  // Cargar los vuelos cada vez que haya una solicitud
+
     if (strcmp(url, "/") == 0) {
         const char *page =
             "<!DOCTYPE html><html lang='es'><head>"
@@ -167,9 +169,6 @@ static enum MHD_Result answer_to_connection(void *cls,
 }
 
 int main() {
-    load_flights();
-    if (!flights) return 1;
-
     struct MHD_Daemon *daemon = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD, PORT,
         NULL, NULL, &answer_to_connection, NULL, MHD_OPTION_END);
     if (!daemon) { fprintf(stderr, "Error iniciando servidor.\n"); return 1; }
