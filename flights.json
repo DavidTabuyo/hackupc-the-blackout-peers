@@ -1,30 +1,25 @@
-[
-    {
-        "id": "IB1234",
-        "gate": "Puerta A5",
-        "departure": "08:30",
-        "notes": "Embarque abierto",
-        "status": "A tiempo"
-    },
-    {
-        "id": "BA5678",
-        "gate": "Puerta B12",
-        "departure": "12:45",
-        "notes": "Retraso 15 min",
-        "status": "Retrasado"
-    },
-    {
-        "id": "AF9012",
-        "gate": "Puerta C3",
-        "departure": "16:00",
-        "notes": "Embarque cerrado",
-        "status": "Cerrado"
-    },
-    {
-        "id": "LH3456",
-        "gate": "Puerta D7",
-        "departure": "20:15",
-        "notes": "Puerta cambiada a D9",
-        "status": "Retrasado"
-    }
-]
+[{
+		"id":	"IB1234",
+		"gate":	"Puerta A5",
+		"departure":	"08:30",
+		"notes":	"Embarque abierto",
+		"status":	"A tiempo"
+	}, {
+		"id":	"BA5678",
+		"gate":	"Puerta B12",
+		"departure":	"12:45",
+		"notes":	"Retraso 15 min",
+		"status":	"Retrasado"
+	}, {
+		"id":	"AF9012",
+		"gate":	"Puerta C3",
+		"departure":	"16:00",
+		"notes":	"Embarque cerrado",
+		"status":	"Cerrado"
+	}, {
+		"id":	"LH3456",
+		"gate":	"Puerta D7",
+		"departure":	"20:15",
+		"notes":	"Puerta cambiada a D9",
+		"status":	"Retrasado"
+	}]
