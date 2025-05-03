@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ "$1" == "server" ]; then
+    gcc rest_api_server.c -o rest_api_server -lmicrohttpd -lcjson && ./rest_api_server
+elif [ "$1" == "admin" ]; then
+    gcc admin_cli.c -o admin_cli -lcjson && ./admin_cli
+else
+    echo "Usage: $0 {server|admin}"
+    exit 1
+fi
