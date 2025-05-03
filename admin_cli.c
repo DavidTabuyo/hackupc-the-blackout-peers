@@ -1,12 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>    // for fsync, rename
 #include <cjson/cJSON.h>
 
 #define DATA_FILE "flights.json"
 #define BUFFER_SIZE 256
 
 // Prototipos
+typedef struct {
+    char *id;
+    char *gate;
+    char *departure;
+    char *notes;
+    char *status;
+} Flight;
+
 cJSON *load_json(const char *filename);
 int save_json(const char *filename, cJSON *json);
 void list_flights(cJSON *array);
@@ -34,6 +43,7 @@ int main() {
 
         char *token = strtok(cmd, " ");
         if (!token) continue;
+
         if (strcmp(token, "list") == 0) {
             list_flights(root);
         } else if (strcmp(token, "show") == 0) {
@@ -52,7 +62,9 @@ int main() {
             else printf("Uso: delete <id>\n");
         } else if (strcmp(token, "save") == 0) {
             if (save_json(DATA_FILE, root) == 0)
-                printf("Guardado en %s\n", DATA_FILE);
+                printf("Guardado atómico en %s\n", DATA_FILE);
+            else
+                printf("Error al guardar %s\n", DATA_FILE);
         } else if (strcmp(token, "exit") == 0) {
             break;
         } else {
@@ -64,6 +76,7 @@ int main() {
     return 0;
 }
 
+// Carga el JSON completo desde disco
 cJSON *load_json(const char *filename) {
     FILE *f = fopen(filename, "rb");
     if (!f) return NULL;
@@ -80,14 +93,29 @@ cJSON *load_json(const char *filename) {
     return json;
 }
 
+// Guarda de forma atómica: escribe en temp y hace rename
 int save_json(const char *filename, cJSON *json) {
     char *str = cJSON_Print(json);
     if (!str) return -1;
-    FILE *f = fopen(filename, "w");
-    if (!f) { free(str); return -1; }
+
+    char tmpfile[BUFFER_SIZE];
+    snprintf(tmpfile, sizeof(tmpfile), "%s.tmp", filename);
+
+    FILE *f = fopen(tmpfile, "w");
+    if (!f) {
+        free(str);
+        return -1;
+    }
     fprintf(f, "%s", str);
+    fflush(f);
+    fsync(fileno(f));
     fclose(f);
     free(str);
+
+    if (rename(tmpfile, filename) != 0) {
+        perror("rename");
+        return -1;
+    }
     return 0;
 }
 
@@ -115,22 +143,11 @@ void show_flight(cJSON *array, const char *id) {
 
 void add_flight(cJSON *array) {
     cJSON *item = cJSON_CreateObject();
-    char *id = prompt("ID: ");
-    cJSON_AddStringToObject(item, "id", id);
-    free(id);
-    char *gate = prompt("Puerta: ");
-    cJSON_AddStringToObject(item, "gate", gate);
-    free(gate);
-    char *dep = prompt("Salida: ");
-    cJSON_AddStringToObject(item, "departure", dep);
-    free(dep);
-    char *notes = prompt("Observaciones: ");
-    cJSON_AddStringToObject(item, "notes", notes);
-    free(notes);
-    char *status = prompt("Estado: ");
-    cJSON_AddStringToObject(item, "status", status);
-    free(status);
-
+    char *id = prompt("ID: "); cJSON_AddStringToObject(item, "id", id); free(id);
+    char *gate = prompt("Puerta: "); cJSON_AddStringToObject(item, "gate", gate); free(gate);
+    char *dep = prompt("Salida: "); cJSON_AddStringToObject(item, "departure", dep); free(dep);
+    char *notes = prompt("Observaciones: "); cJSON_AddStringToObject(item, "notes", notes); free(notes);
+    char *status = prompt("Estado: "); cJSON_AddStringToObject(item, "status", status); free(status);
     cJSON_AddItemToArray(array, item);
     printf("Vuelo agregado.\n");
 }
